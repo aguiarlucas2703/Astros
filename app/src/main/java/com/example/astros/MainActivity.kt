@@ -17,7 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.example.astros.ui.screens.CatalogScreen
+import com.example.astros.ui.screens.CatalogTab
 import com.example.astros.ui.screens.EventsScreen
 import com.example.astros.ui.screens.QuizScreen
 import com.example.astros.ui.theme.AstrosTheme
@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // AstrosTheme aplica nossa paleta de azuis em tdo app
+            // AstrosTheme aplica nossa paleta de azuis em tod o app
             AstrosTheme {
                 AstrosApp()
             }
@@ -100,7 +100,7 @@ fun AstrosApp() {
         // Conteúdo exibido no corpo da tela, conforme a aba selecionada
         // `when` é o equivalente Kotlin de um switch/case, mas mais poderoso
         when (currentDestination) {
-            AppDestinations.CATALOG -> CatalogScreen()
+            AppDestinations.CATALOG -> CatalogTab()
             AppDestinations.EVENTS  -> EventsScreen()
             AppDestinations.QUIZ    -> QuizScreen()
         }
