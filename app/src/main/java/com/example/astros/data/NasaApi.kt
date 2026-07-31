@@ -36,9 +36,9 @@ data class NasaLink(val href: String)
 // background (Coroutines) para não travar a tela do celular (a UI Thread).
 // =============================================================================
 interface NasaApiService {
-    // A URL final será: https://images-api.nasa.gov/search?media_type=image&q=TERMO
+    // A URL final será: https://images-api.nasa.gov/search?media_type=image&nasa_id=ID
     @GET("search?media_type=image")
-    suspend fun searchImages(@Query("q") query: String): NasaResponse
+    suspend fun searchImages(@Query("nasa_id") query: String): NasaResponse
 }
 
 // =============================================================================
