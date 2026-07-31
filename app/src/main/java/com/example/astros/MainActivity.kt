@@ -4,40 +4,40 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Quiz
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.astros.ui.screens.CatalogTab
 import com.example.astros.ui.screens.EventsScreen
 import com.example.astros.ui.screens.QuizScreen
+import com.example.astros.ui.screens.SettingsScreen
 import com.example.astros.ui.theme.AstrosTheme
+import kotlinx.coroutines.launch
 
 // =============================================================================
 // MainActivity — ponto de entrada do app
-//
-// No Android, toda tela principal começa em uma Activity.
-// Aqui usamos ComponentActivity (base do Jetpack Compose).
-//
-// onCreate() é chamado quando o app inicia. Dentro dele:
-//   - enableEdgeToEdge() → faz o conteúdo ocupar toda a tela (sob status bar)
-//   - setContent {}      → define a UI em Compose (substitui o XML de layout)
 // =============================================================================
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // AstrosTheme aplica nossa paleta de azuis em tod o app
             AstrosTheme {
                 AstrosApp()
             }
@@ -46,63 +46,94 @@ class MainActivity : ComponentActivity() {
 }
 
 // =============================================================================
-// AppDestinations — enum que define as 3 abas do app
-//
-// Um enum é um tipo que só pode ter os valores listados (CATALOG, EVENTS, QUIZ).
-// Cada valor carrega consigo:
-//   - label: texto exibido na aba
-//   - icon:  ícone do Material Design (ImageVector)
-//
-// 🔧 PONTO DE ALTERAÇÃO AO VIVO: se o professor pedir para adicionar/remover
-//    uma aba, é só adicionar/remover uma entrada neste enum.
+// AppDestinations — enum que define os destinos do app
+// Agora temos 4 destinos, mas Configurações só aparecerá no Menu Sanduíche.
 // =============================================================================
 enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    CATALOG("Catálogo", Icons.Default.Explore),   // bússola/exploração → catálogo
-    EVENTS ("Eventos",  Icons.Default.Event),     // calendário         → eventos
-    QUIZ   ("Quiz",     Icons.Default.Quiz),      // ponto de interrogação → quiz
+    CATALOG("Catálogo", Icons.Default.Explore),
+    EVENTS ("Eventos",  Icons.Default.Event),
+    QUIZ   ("Quiz",     Icons.Default.Quiz),
+    SETTINGS("Configurações", Icons.Default.Settings)
 }
 
 // =============================================================================
-// AstrosApp — Composable raiz que monta a navegação por abas
+// AstrosApp — Composable raiz com Redundância de Navegação
 //
-// NavigationSuiteScaffold é o componente do Material3 que exibe:
-//   - BottomNavigationBar (celulares, portrait)
-//   - NavigationRail (tablets, landscape)
-//   - NavigationDrawer (telas grandes)
-// ...automaticamente, sem código extra!
-//
-// Estado:
-//   - `currentDestination` guarda qual aba está ativa
-//   - `rememberSaveable` mantém o valor mesmo ao girar a tela
-//   - `by` é um delegate Kotlin: lê/escreve como variável normal
+// 🔧 PONTO PARA DEFESA AO VIVO:
+// Usamos ModalNavigationDrawer por fora para criar o Menu Sanduíche.
+// Por dentro, mantemos o NavigationSuiteScaffold para a barra inferior.
+// A tela de Configurações só aparece no Drawer, garantindo hierarquia de UI.
 // =============================================================================
 @Composable
 fun AstrosApp() {
-    // Estado da aba ativa — começa no Catálogo
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.CATALOG) }
+    
+    // Controle de estado do Menu Lateral e Coroutine para abrí-lo/fechá-lo
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    NavigationSuiteScaffold(
-        // Constrói os itens da barra de navegação iterando sobre o enum
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach { destination ->
-                item(
-                    icon     = { Icon(destination.icon, contentDescription = destination.label) },
-                    label    = { Text(destination.label) },
-                    selected = destination == currentDestination,  // destaque na aba ativa
-                    onClick  = { currentDestination = destination }  // troca de aba ao clicar
+    // O Drawer envolve tod o aplicativo
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text(
+                    text = "Astros App",
+                    modifier = Modifier.padding(24.dp),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
+                HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
+                
+                // Monta os botões do Menu Sanduíche (incluindo Configurações)
+                AppDestinations.entries.forEach { destination ->
+                    NavigationDrawerItem(
+                        label = { Text(destination.label) },
+                        icon = { Icon(destination.icon, contentDescription = null) },
+                        selected = destination == currentDestination,
+                        onClick = {
+                            currentDestination = destination
+                            scope.launch { drawerState.close() } // Fecha o menu ao clicar
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                }
             }
         }
     ) {
-        // Conteúdo exibido no corpo da tela, conforme a aba selecionada
-        // `when` é o equivalente Kotlin de um switch/case, mas mais poderoso
-        when (currentDestination) {
-            AppDestinations.CATALOG -> CatalogTab()
-            AppDestinations.EVENTS  -> EventsScreen()
-            AppDestinations.QUIZ    -> QuizScreen()
+        // O conteúdo interno continua sendo gerenciado pela barra inferior
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                // Filtramos a tela de configurações para ELA NÃO APARECER na barra inferior
+                val bottomBarItems = listOf(
+                    AppDestinations.CATALOG, 
+                    AppDestinations.EVENTS, 
+                    AppDestinations.QUIZ
+                )
+                
+                bottomBarItems.forEach { destination ->
+                    item(
+                        icon     = { Icon(destination.icon, contentDescription = destination.label) },
+                        label    = { Text(destination.label) },
+                        selected = destination == currentDestination,
+                        onClick  = { currentDestination = destination }
+                    )
+                }
+            }
+        ) {
+            // Função que repassamos para as telas poderem abrir o menu no clique do TopAppBar
+            val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
+
+            when (currentDestination) {
+                AppDestinations.CATALOG -> CatalogTab(openDrawer = openDrawer)
+                AppDestinations.EVENTS  -> EventsScreen(openDrawer = openDrawer)
+                AppDestinations.QUIZ    -> QuizScreen(openDrawer = openDrawer)
+                AppDestinations.SETTINGS -> SettingsScreen(openDrawer = openDrawer)
+            }
         }
     }
 }

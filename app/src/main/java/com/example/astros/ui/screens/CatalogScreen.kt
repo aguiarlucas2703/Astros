@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Tsunami
@@ -30,7 +31,7 @@ import com.example.astros.data.CelestialBody
 // CatalogTab — Controlador de Navegação em 3 Níveis
 // =============================================================================
 @Composable
-fun CatalogTab(viewModel: CatalogViewModel = viewModel()) {
+fun CatalogTab(openDrawer: () -> Unit, viewModel: CatalogViewModel = viewModel()) {
     // Nível 1: Categoria selecionada
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     // Nível 2: Corpo celeste selecionado (Detalhes)
@@ -68,6 +69,7 @@ fun CatalogTab(viewModel: CatalogViewModel = viewModel()) {
         else -> {
             CategoryGridScreen(
                 categories = viewModel.categories,
+                openDrawer = openDrawer,
                 onCategoryClick = { category ->
                     selectedCategory = category
                     // O PULO DO GATO: Carrega imagens da NASA só ao entrar na categoria!
@@ -81,28 +83,47 @@ fun CatalogTab(viewModel: CatalogViewModel = viewModel()) {
 // =============================================================================
 // NÍVEL 1: Tela de Categorias (Grade / Grid)
 // =============================================================================
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryGridScreen(
     categories: List<String>,
+    openDrawer: () -> Unit,
     onCategoryClick: (String) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "Explorar Catálogo",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(24.dp)
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Catálogo") },
+                navigationIcon = {
+                    IconButton(onClick = openDrawer) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+    ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            Text(
+                text = "Explorar",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(24.dp)
+            )
 
-        // LazyVerticalGrid é perfeito para criar um visual de "Menu em blocos"
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2), // 2 colunas
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(categories) { category ->
-                CategoryCard(category = category, onClick = { onCategoryClick(category) })
+            // LazyVerticalGrid é perfeito para criar um visual de "Menu em blocos"
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2), // 2 colunas
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(categories) { category ->
+                    CategoryCard(category = category, onClick = { onCategoryClick(category) })
+                }
             }
         }
     }
