@@ -111,6 +111,10 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
             prefs.edit().putInt("HIGH_SCORE", finalScore).apply()
         }
         
+        // Gamificação: Soma XP Total (10 XP por acerto)
+        val currentXp = prefs.getInt("TOTAL_XP", 0)
+        prefs.edit().putInt("TOTAL_XP", currentXp + (finalScore * 10)).apply()
+        
         _gameState.value = QuizGameState.END
     }
 
