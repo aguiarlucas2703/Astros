@@ -124,4 +124,8 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         _isAnswerCorrect.value = null
         _gameState.value = QuizGameState.START
     }
+
+    fun returnToStart() {
+        _gameState.value = QuizGameState.START
+    }
 }

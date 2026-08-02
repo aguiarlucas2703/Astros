@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
@@ -321,6 +322,20 @@ fun QuizEndScreen(viewModel: QuizViewModel) {
             Icon(Icons.Default.Replay, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text("JOGAR NOVAMENTE", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        OutlinedButton(
+            onClick = { viewModel.returnToStart() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Icon(Icons.Default.ArrowBack, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("VOLTAR PARA O INÍCIO", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
