@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Search
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.astros.ui.screens.AboutScreen
 import com.example.astros.ui.screens.CatalogTab
 import com.example.astros.ui.screens.EventsScreen
 import com.example.astros.ui.screens.GuessScreen
@@ -77,7 +79,8 @@ enum class AppDestinations(
     QUIZ   ("Quiz",     Icons.Default.Quiz),
     GUESS_GAME("Adivinhe", Icons.Default.Search),
     PROFILE("Meu Perfil", Icons.Default.Person),
-    SETTINGS("Configurações", Icons.Default.Settings)
+    SETTINGS("Configurações", Icons.Default.Settings),
+    ABOUT("Sobre", Icons.Default.Info)
 }
 
 // =============================================================================
@@ -154,6 +157,7 @@ fun AstrosApp() {
                 AppDestinations.GUESS_GAME -> GuessScreen(openDrawer = openDrawer)
                 AppDestinations.PROFILE -> ProfileScreen(openDrawer = openDrawer)
                 AppDestinations.SETTINGS -> SettingsScreen(openDrawer = openDrawer)
+                AppDestinations.ABOUT -> AboutScreen(openDrawer = openDrawer)
             }
         }
     }
