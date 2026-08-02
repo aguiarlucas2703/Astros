@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -112,6 +113,17 @@ fun AstrosApp(darkTheme: Boolean) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
+
+    // Intercepta o botão/gesto de voltar do Android:
+    // 1º) Fecha o drawer se estiver aberto
+    // 2º) Volta para o Catálogo se estiver em outra tela
+    // 3º) Se já no Catálogo, deixa o sistema agir (minimiza o app)
+    BackHandler(enabled = drawerState.isOpen || currentDestination != AppDestinations.CATALOG) {
+        when {
+            drawerState.isOpen -> scope.launch { drawerState.close() }
+            else -> currentDestination = AppDestinations.CATALOG
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
