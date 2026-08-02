@@ -18,9 +18,17 @@ import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Satellite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,11 +37,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.astros.ui.components.StarryBackground
+import com.example.astros.ui.components.SunnyBackground
 import com.example.astros.ui.screens.AboutScreen
 import com.example.astros.ui.screens.CatalogTab
 import com.example.astros.ui.screens.EventsScreen
@@ -57,10 +68,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = viewModel()
             val themeMode by settingsViewModel.themeMode.collectAsState()
-            
+
             val darkTheme = when (themeMode) {
-                ThemeMode.LIGHT -> false
-                ThemeMode.DARK -> true
+                ThemeMode.LIGHT  -> false
+                ThemeMode.DARK   -> true
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
 
@@ -72,53 +83,46 @@ class MainActivity : ComponentActivity() {
 }
 
 // =============================================================================
-// AppDestinations — enum que define os destinos do app
-// Agora temos 4 destinos, mas Configurações só aparecerá no Menu Sanduíche.
+// AppDestinations — enum que define todos os destinos de navegação do app.
+// SETTINGS e ABOUT só aparecem no Menu Sanduíche (não na barra inferior).
 // =============================================================================
 enum class AppDestinations(
     val label: String,
     val icon: ImageVector,
 ) {
-    CATALOG("Catálogo", Icons.Default.Explore),
-    EVENTS ("Eventos",  Icons.Default.Event),
-    QUIZ   ("Quiz",     Icons.Default.Quiz),
-    GUESS_GAME("Adivinhe", Icons.Default.Search),
+    CATALOG    ("Catálogo",       Icons.Default.Explore),
+    EVENTS     ("Eventos",        Icons.Default.Event),
+    QUIZ       ("Quiz",           Icons.Default.Quiz),
+    GUESS_GAME ("Adivinhe",       Icons.Default.Search),
     ISS_TRACKER("Rastreador ISS", Icons.Default.Satellite),
-    PROFILE("Meu Perfil", Icons.Default.Person),
-    SETTINGS("Configurações", Icons.Default.Settings),
-    ABOUT("Sobre", Icons.Default.Info)
+    PROFILE    ("Meu Perfil",     Icons.Default.Person),
+    SETTINGS   ("Configurações",  Icons.Default.Settings),
+    ABOUT      ("Sobre",          Icons.Default.Info),
 }
 
 // =============================================================================
-// AstrosApp — Composable raiz com Redundância de Navegação
-// ModalNavigationDrawer por fora para criar o Menu Sanduíche.
-// Por dentro, mantem-se o NavigationSuiteScaffold para a barra inferior.
-// A tela de Configurações só aparece no Drawer, garantindo hierarquia de UI.
+// AstrosApp — Composable raiz.
+// ModalNavigationDrawer (menu sanduíche) envolve o NavigationSuiteScaffold
+// (barra de navegação inferior). Configurações e Sobre só ficam no drawer.
 // =============================================================================
 @Composable
 fun AstrosApp(darkTheme: Boolean) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.CATALOG) }
-    
-    // Controle de estado do Menu Lateral e Coroutine para abrí-lo/fechá-lo
+
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
 
-    // O Drawer envolve tod o aplicativo
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(
-                drawerContainerColor = androidx.compose.ui.graphics.Color.Transparent
-            ) {
-                // Adaptamos o tema do menu para ficar claro/escuro de acordo com o estado real
+            ModalDrawerSheet(drawerContainerColor = Color.Transparent) {
+                // Aplica o tema correto para que ícones e textos tenham contraste adequado
                 AstrosTheme(darkTheme = darkTheme) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        if (darkTheme) {
-                            com.example.astros.ui.components.StarryBackground()
-                        } else {
-                            com.example.astros.ui.components.SunnyBackground()
-                        }
-                        
+                        // Fundo adaptativo: estrelas no escuro, sol no claro
+                        if (darkTheme) StarryBackground() else SunnyBackground()
+
                         Column(modifier = Modifier.fillMaxSize()) {
                             Text(
                                 text = "Astros App",
@@ -128,20 +132,19 @@ fun AstrosApp(darkTheme: Boolean) {
                                 color = MaterialTheme.colorScheme.primary
                             )
                             HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
-                
-                            // Monta os botões do Menu Sanduíche (incluindo Configurações)
+
                             AppDestinations.entries.forEach { destination ->
                                 NavigationDrawerItem(
-                                    label = { Text(destination.label) },
-                                    icon = { Icon(destination.icon, contentDescription = null) },
+                                    label    = { Text(destination.label) },
+                                    icon     = { Icon(destination.icon, contentDescription = null) },
                                     selected = destination == currentDestination,
-                                    onClick = {
+                                    onClick  = {
                                         currentDestination = destination
-                                        scope.launch { drawerState.close() } // Fecha o menu ao clicar
+                                        scope.launch { drawerState.close() }
                                     },
                                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
-                                    colors = NavigationDrawerItemDefaults.colors(
-                                        unselectedContainerColor = androidx.compose.ui.graphics.Color.Transparent
+                                    colors   = NavigationDrawerItemDefaults.colors(
+                                        unselectedContainerColor = Color.Transparent
                                     )
                                 )
                             }
@@ -151,16 +154,15 @@ fun AstrosApp(darkTheme: Boolean) {
             }
         }
     ) {
-        // O conteúdo interno continua sendo gerenciado pela barra inferior
+        // Barra de navegação inferior — apenas as 3 abas principais
+        val bottomBarItems = listOf(
+            AppDestinations.CATALOG,
+            AppDestinations.EVENTS,
+            AppDestinations.QUIZ,
+        )
+
         NavigationSuiteScaffold(
             navigationSuiteItems = {
-                // Filtramos a tela de configurações para ELA NÃO APARECER na barra inferior
-                val bottomBarItems = listOf(
-                    AppDestinations.CATALOG, 
-                    AppDestinations.EVENTS, 
-                    AppDestinations.QUIZ
-                )
-                
                 bottomBarItems.forEach { destination ->
                     item(
                         icon     = { Icon(destination.icon, contentDescription = destination.label) },
@@ -171,18 +173,15 @@ fun AstrosApp(darkTheme: Boolean) {
                 }
             }
         ) {
-            // Função que repassamos para as telas poderem abrir o menu no clique do TopAppBar
-            val openDrawer: () -> Unit = { scope.launch { drawerState.open() } }
-
             when (currentDestination) {
-                AppDestinations.CATALOG -> CatalogTab(openDrawer = openDrawer)
-                AppDestinations.EVENTS  -> EventsScreen(openDrawer = openDrawer)
-                AppDestinations.QUIZ    -> QuizScreen(openDrawer = openDrawer)
-                AppDestinations.GUESS_GAME -> GuessScreen(openDrawer = openDrawer)
+                AppDestinations.CATALOG     -> CatalogTab(openDrawer = openDrawer)
+                AppDestinations.EVENTS      -> EventsScreen(openDrawer = openDrawer)
+                AppDestinations.QUIZ        -> QuizScreen(openDrawer = openDrawer)
+                AppDestinations.GUESS_GAME  -> GuessScreen(openDrawer = openDrawer)
                 AppDestinations.ISS_TRACKER -> IssScreen(openDrawer = openDrawer)
-                AppDestinations.PROFILE -> ProfileScreen(openDrawer = openDrawer)
-                AppDestinations.SETTINGS -> SettingsScreen(openDrawer = openDrawer)
-                AppDestinations.ABOUT -> AboutScreen(openDrawer = openDrawer)
+                AppDestinations.PROFILE     -> ProfileScreen(openDrawer = openDrawer)
+                AppDestinations.SETTINGS    -> SettingsScreen(openDrawer = openDrawer)
+                AppDestinations.ABOUT       -> AboutScreen(openDrawer = openDrawer)
             }
         }
     }

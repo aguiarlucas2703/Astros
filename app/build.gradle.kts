@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.coil.compose)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
+    implementation("androidx.webkit:webkit:1.11.0")
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
