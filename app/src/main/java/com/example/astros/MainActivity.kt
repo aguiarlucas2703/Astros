@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Satellite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Settings
@@ -37,6 +38,7 @@ import com.example.astros.ui.screens.AboutScreen
 import com.example.astros.ui.screens.CatalogTab
 import com.example.astros.ui.screens.EventsScreen
 import com.example.astros.ui.screens.GuessScreen
+import com.example.astros.ui.screens.IssScreen
 import com.example.astros.ui.screens.ProfileScreen
 import com.example.astros.ui.screens.QuizScreen
 import com.example.astros.ui.screens.SettingsScreen
@@ -81,6 +83,7 @@ enum class AppDestinations(
     EVENTS ("Eventos",  Icons.Default.Event),
     QUIZ   ("Quiz",     Icons.Default.Quiz),
     GUESS_GAME("Adivinhe", Icons.Default.Search),
+    ISS_TRACKER("Rastreador ISS", Icons.Default.Satellite),
     PROFILE("Meu Perfil", Icons.Default.Person),
     SETTINGS("Configurações", Icons.Default.Settings),
     ABOUT("Sobre", Icons.Default.Info)
@@ -176,6 +179,7 @@ fun AstrosApp(darkTheme: Boolean) {
                 AppDestinations.EVENTS  -> EventsScreen(openDrawer = openDrawer)
                 AppDestinations.QUIZ    -> QuizScreen(openDrawer = openDrawer)
                 AppDestinations.GUESS_GAME -> GuessScreen(openDrawer = openDrawer)
+                AppDestinations.ISS_TRACKER -> IssScreen(openDrawer = openDrawer)
                 AppDestinations.PROFILE -> ProfileScreen(openDrawer = openDrawer)
                 AppDestinations.SETTINGS -> SettingsScreen(openDrawer = openDrawer)
                 AppDestinations.ABOUT -> AboutScreen(openDrawer = openDrawer)
