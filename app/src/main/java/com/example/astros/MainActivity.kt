@@ -11,6 +11,8 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.astros.ui.screens.CatalogTab
 import com.example.astros.ui.screens.EventsScreen
+import com.example.astros.ui.screens.GuessScreen
 import com.example.astros.ui.screens.ProfileScreen
 import com.example.astros.ui.screens.QuizScreen
 import com.example.astros.ui.screens.SettingsScreen
@@ -72,6 +75,7 @@ enum class AppDestinations(
     CATALOG("Catálogo", Icons.Default.Explore),
     EVENTS ("Eventos",  Icons.Default.Event),
     QUIZ   ("Quiz",     Icons.Default.Quiz),
+    GUESS_GAME("Adivinhe", Icons.Default.Search),
     PROFILE("Meu Perfil", Icons.Default.Person),
     SETTINGS("Configurações", Icons.Default.Settings)
 }
@@ -147,6 +151,7 @@ fun AstrosApp() {
                 AppDestinations.CATALOG -> CatalogTab(openDrawer = openDrawer)
                 AppDestinations.EVENTS  -> EventsScreen(openDrawer = openDrawer)
                 AppDestinations.QUIZ    -> QuizScreen(openDrawer = openDrawer)
+                AppDestinations.GUESS_GAME -> GuessScreen(openDrawer = openDrawer)
                 AppDestinations.PROFILE -> ProfileScreen(openDrawer = openDrawer)
                 AppDestinations.SETTINGS -> SettingsScreen(openDrawer = openDrawer)
             }
