@@ -81,7 +81,7 @@ fun SettingsScreen(
             // Opção: Claro
             ThemeOptionCard(
                 title = "Modo Claro",
-                description = "Força o aplicativo a usar cores claras.",
+                description = "Altera o tema do aplicativo para o modo claro.",
                 icon = Icons.Default.LightMode,
                 isSelected = currentTheme == ThemeMode.LIGHT,
                 onClick = { viewModel.setThemeMode(ThemeMode.LIGHT) }
@@ -92,7 +92,7 @@ fun SettingsScreen(
             // Opção: Escuro
             ThemeOptionCard(
                 title = "Modo Escuro",
-                description = "Força o aplicativo a usar o tema noturno.",
+                description = "Altera o tema do aplicativo para o modo escuro.",
                 icon = Icons.Default.DarkMode,
                 isSelected = currentTheme == ThemeMode.DARK,
                 onClick = { viewModel.setThemeMode(ThemeMode.DARK) }
