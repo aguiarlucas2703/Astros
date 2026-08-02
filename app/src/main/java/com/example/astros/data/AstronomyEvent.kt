@@ -5,11 +5,9 @@ import java.time.LocalDate
 // =============================================================================
 // AstronomyEvent — Modelo de Dados para a aba de Eventos
 //
-// 🔧 PONTO PARA DEFESA AO VIVO:
-// Usamos o `java.time.LocalDate` (API nativa moderna do Java 8+) para
-// representar a data do evento. Isso facilita incrivelmente a comparação
-// com a data atual (isBefore, isAfter, isEqual) sem a confusão da antiga 
-// classe Date/Calendar.
+// Utiliza `java.time.LocalDate` (API nativa do Java 8+) para
+// representar a data do evento, facilitando a comparação
+// com a data atual (isBefore, isAfter, isEqual).
 // =============================================================================
 data class AstronomyEvent(
     val id: String,

@@ -61,10 +61,8 @@ enum class AppDestinations(
 
 // =============================================================================
 // AstrosApp — Composable raiz com Redundância de Navegação
-//
-// 🔧 PONTO PARA DEFESA AO VIVO:
-// Usamos ModalNavigationDrawer por fora para criar o Menu Sanduíche.
-// Por dentro, mantemos o NavigationSuiteScaffold para a barra inferior.
+// ModalNavigationDrawer por fora para criar o Menu Sanduíche.
+// Por dentro, mantem-se o NavigationSuiteScaffold para a barra inferior.
 // A tela de Configurações só aparece no Drawer, garantindo hierarquia de UI.
 // =============================================================================
 @Composable

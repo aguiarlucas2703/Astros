@@ -5,11 +5,10 @@ import java.util.Collections;
 import java.util.List;
 
 // =============================================================================
-// QuizEngine — O Cérebro do Jogo (JAVA PURO)
+// QuizEngine — Controlador lógico do Quiz (Java)
 //
-// 🔧 PONTO PARA DEFESA AO VIVO:
 // Esta classe é responsável por aplicar as regras de negócio:
-// - Sortear 10 perguntas do banco de 50 (sem repetição na mesma partida).
+// - Sortear 10 perguntas do banco (sem repetição na mesma partida).
 // - Validar as respostas.
 // - Contabilizar os pontos.
 // =============================================================================

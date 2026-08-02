@@ -3,11 +3,7 @@ package com.example.astros.quiz;
 import java.util.List;
 
 // =============================================================================
-// Question — Modelo de Dados do Quiz (JAVA PURO)
-//
-// 🔧 PONTO PARA DEFESA AO VIVO:
-// Esta classe é escrita inteiramente em Java para cumprir os requisitos da
-// disciplina. Ela representa o modelo de domínio sem nenhuma dependência do Android.
+// Question — Modelo de Dados do Quiz
 // =============================================================================
 public class Question {
     private String text;

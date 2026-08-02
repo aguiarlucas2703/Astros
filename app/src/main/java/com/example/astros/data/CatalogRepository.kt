@@ -6,9 +6,8 @@ import kotlinx.coroutines.withContext
 // =============================================================================
 // CatalogRepository — Fonte de Dados do Catálogo
 //
-// 🔧 PONTO PARA DEFESA AO VIVO:
-// Usamos nasa_id para garantir que a imagem retornada pela API seja exata
-// e de alta qualidade, evitando lixo em buscas genéricas.
+// Utiliza nasa_id para garantir que a imagem retornada pela API seja exata
+// e de alta qualidade, otimizando as buscas.
 // =============================================================================
 class CatalogRepository {
 

@@ -17,12 +17,11 @@ enum class QuizGameState {
 }
 
 // =============================================================================
-// QuizViewModel — A Ponte entre Kotlin e Java
+// QuizViewModel — Adaptador de Interface
 //
-// 🔧 PONTO PARA DEFESA AO VIVO:
-// Este ViewModel serve como adaptador. Ele puxa os dados do QuizEngine (Java)
-// e os converte em 'StateFlows' para a interface (Kotlin/Jetpack Compose).
-// Além disso, usa SharedPreferences para persistir o Recorde Máximo do jogador.
+// Este ViewModel gerencia a integração dos dados do QuizEngine (Java)
+// convertendo-os em 'StateFlows' para a interface (Kotlin/Jetpack Compose).
+// Utiliza SharedPreferences para persistência do recorde.
 // =============================================================================
 class QuizViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -113,5 +112,12 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         _gameState.value = QuizGameState.END
+    }
+
+    fun giveUp() {
+        isProcessingAnswer = false
+        _selectedOptionIndex.value = null
+        _isAnswerCorrect.value = null
+        _gameState.value = QuizGameState.START
     }
 }

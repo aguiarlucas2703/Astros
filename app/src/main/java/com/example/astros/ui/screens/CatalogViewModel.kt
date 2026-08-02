@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 // =============================================================================
-// CatalogViewModel — Gerenciador de Estado do Catálogo (Refatorado)
+// CatalogViewModel — Gerenciador de Estado do Catálogo
 // =============================================================================
 class CatalogViewModel : ViewModel() {
     private val repository = CatalogRepository()
@@ -32,10 +32,11 @@ class CatalogViewModel : ViewModel() {
         return _uiState.value.filter { it.category == category }
     }
 
-    // 🔧 PONTO PARA DEFESA AO VIVO:
-    // Lazy Loading (Carregamento Preguiçoso). Em vez de baixar as fotos de todos
-    // os 50 planetas e estrelas quando o app abre, só baixamos da categoria
-    // que o usuário clicou. Isso poupa bateria, internet e evita block da API.
+    // =========================================================================
+    // Utiliza Lazy Loading. As imagens não são carregadas de uma vez no início.
+    // O app realiza chamadas à API apenas ao selecionar a categoria,
+    // economizando banda e otimizando a performance inicial.
+    // =========================================================================
     fun loadImagesForCategory(category: String) {
         val bodiesToLoad = getBodiesByCategory(category)
         

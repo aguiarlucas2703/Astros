@@ -5,11 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 // =============================================================================
-// QuestionBank — Repositório de Questões (JAVA PURO)
-//
-// 🔧 PONTO PARA DEFESA AO VIVO:
-// Um banco vasto com 50 questões garante que o Quiz seja altamente rejogável
-// e reduz a chance de perguntas repetidas.
+// QuestionBank — Repositório de Questões
+// Um banco vasto com 50 questões
+// reduz a chance de perguntas repetidas.
 // =============================================================================
 public class QuestionBank {
 

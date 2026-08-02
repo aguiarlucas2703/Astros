@@ -253,6 +253,15 @@ fun QuizPlayingScreen(viewModel: QuizViewModel) {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        TextButton(
+            onClick = { viewModel.giveUp() },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text("Desistir da Missão", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+        }
     }
 }
 
