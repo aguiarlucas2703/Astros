@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
@@ -60,7 +63,7 @@ class MainActivity : ComponentActivity() {
             }
 
             AstrosTheme(darkTheme = darkTheme) {
-                AstrosApp()
+                AstrosApp(darkTheme)
             }
         }
     }
@@ -90,7 +93,7 @@ enum class AppDestinations(
 // A tela de Configurações só aparece no Drawer, garantindo hierarquia de UI.
 // =============================================================================
 @Composable
-fun AstrosApp() {
+fun AstrosApp(darkTheme: Boolean) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.CATALOG) }
     
     // Controle de estado do Menu Lateral e Coroutine para abrí-lo/fechá-lo
@@ -101,28 +104,46 @@ fun AstrosApp() {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Text(
-                    text = "Astros App",
-                    modifier = Modifier.padding(24.dp),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
+            ModalDrawerSheet(
+                drawerContainerColor = androidx.compose.ui.graphics.Color.Transparent
+            ) {
+                // Adaptamos o tema do menu para ficar claro/escuro de acordo com o estado real
+                AstrosTheme(darkTheme = darkTheme) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        if (darkTheme) {
+                            com.example.astros.ui.components.StarryBackground()
+                        } else {
+                            com.example.astros.ui.components.SunnyBackground()
+                        }
+                        
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = "Astros App",
+                                modifier = Modifier.padding(24.dp),
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
                 
-                // Monta os botões do Menu Sanduíche (incluindo Configurações)
-                AppDestinations.entries.forEach { destination ->
-                    NavigationDrawerItem(
-                        label = { Text(destination.label) },
-                        icon = { Icon(destination.icon, contentDescription = null) },
-                        selected = destination == currentDestination,
-                        onClick = {
-                            currentDestination = destination
-                            scope.launch { drawerState.close() } // Fecha o menu ao clicar
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
+                            // Monta os botões do Menu Sanduíche (incluindo Configurações)
+                            AppDestinations.entries.forEach { destination ->
+                                NavigationDrawerItem(
+                                    label = { Text(destination.label) },
+                                    icon = { Icon(destination.icon, contentDescription = null) },
+                                    selected = destination == currentDestination,
+                                    onClick = {
+                                        currentDestination = destination
+                                        scope.launch { drawerState.close() } // Fecha o menu ao clicar
+                                    },
+                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+                                    colors = NavigationDrawerItemDefaults.colors(
+                                        unselectedContainerColor = androidx.compose.ui.graphics.Color.Transparent
+                                    )
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
