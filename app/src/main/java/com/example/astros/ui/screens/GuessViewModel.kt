@@ -27,7 +27,7 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _currentItem = MutableStateFlow<GuessItem?>(null)
     val currentItem: StateFlow<GuessItem?> = _currentItem.asStateFlow()
-    
+
     private val _currentImageUrl = MutableStateFlow<String?>(null)
     val currentImageUrl: StateFlow<String?> = _currentImageUrl.asStateFlow()
 
@@ -39,9 +39,13 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _showError = MutableStateFlow(false)
     val showError: StateFlow<Boolean> = _showError.asStateFlow()
-    
+
     private val _isCorrect = MutableStateFlow(false)
     val isCorrect: StateFlow<Boolean> = _isCorrect.asStateFlow()
+
+    // Novo: quando errou, revela a resposta e bloqueia novas tentativas até o usuário avançar
+    private val _showReveal = MutableStateFlow(false)
+    val showReveal: StateFlow<Boolean> = _showReveal.asStateFlow()
 
     fun startGame() {
         guessEngine.startNewGame()
@@ -57,7 +61,8 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
         _currentImageUrl.value = null
         _showError.value = false
         _isCorrect.value = false
-        
+        _showReveal.value = false
+
         if (item != null) {
             viewModelScope.launch {
                 val url = repository.getImageUrlFor(item.nasaImageId)
@@ -67,36 +72,45 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun submitGuess(input: String) {
-        if (_isCorrect.value) return // Previne duplos envios rápidos
-        
+        // Bloqueia se já acertou ou se está em modo de revelação (aguardando "Próximo")
+        if (_isCorrect.value || _showReveal.value) return
+
         val isMatch = guessEngine.submitAnswer(input)
-        
+
         if (isMatch) {
             _isCorrect.value = true
             _score.value = guessEngine.score
-            
-            // Gamificação: Adivinhar requer mais esforço mental (Input Text), vale 20 XP!
+
+            // Gamificação: Adivinhar por texto vale 20 XP
             val currentXp = prefs.getInt("TOTAL_XP", 0)
             prefs.edit().putInt("TOTAL_XP", currentXp + 20).apply()
-            
+
+            // Avança automaticamente após 1.5s quando acerta
             viewModelScope.launch {
                 delay(1500)
-                val hasNext = guessEngine.moveToNext()
-                if (hasNext) {
-                    loadCurrentItem()
-                } else {
-                    _gameState.value = GuessGameState.RESULT
-                }
+                advanceToNext()
             }
         } else {
+            // Erro: mostra mensagem de erro brevemente, depois revela a resposta correta
             _showError.value = true
             viewModelScope.launch {
-                delay(2000)
+                delay(800)
                 _showError.value = false
+                _showReveal.value = true  // Bloqueia input e mostra card com resposta
             }
         }
     }
-    
+
+    // Chamado pelo botão "Próximo" após errar e ver a resposta correta
+    fun advanceToNext() {
+        val hasNext = guessEngine.moveToNext()
+        if (hasNext) {
+            loadCurrentItem()
+        } else {
+            _gameState.value = GuessGameState.RESULT
+        }
+    }
+
     fun giveUp() {
         _gameState.value = GuessGameState.START
     }

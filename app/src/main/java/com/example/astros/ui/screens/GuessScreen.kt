@@ -125,6 +125,7 @@ fun GuessPlayingScreen(viewModel: GuessViewModel) {
     val score by viewModel.score.collectAsState()
     val isCorrect by viewModel.isCorrect.collectAsState()
     val showError by viewModel.showError.collectAsState()
+    val showReveal by viewModel.showReveal.collectAsState()
     
     var inputText by remember { mutableStateOf("") }
     
@@ -132,6 +133,9 @@ fun GuessPlayingScreen(viewModel: GuessViewModel) {
     LaunchedEffect(round) {
         inputText = ""
     }
+
+    // Trava o input também quando a resposta é revelada
+    val inputEnabled = !isCorrect && !showReveal
 
     if (item == null) return
 
@@ -215,40 +219,91 @@ fun GuessPlayingScreen(viewModel: GuessViewModel) {
             label = { Text("Qual é o nome deste astro?") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            enabled = !isCorrect,
+            enabled = inputEnabled,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
                 onDone = { viewModel.submitGuess(inputText) }
             ),
             isError = showError,
             supportingText = {
-                if (showError) Text("Nome incorreto, tente novamente!", color = MaterialTheme.colorScheme.error)
+                if (showError) Text("Nome incorreto!", color = MaterialTheme.colorScheme.error)
             }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botão Submeter ou Feedback de Sucesso
-        if (isCorrect) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Correto! +20 XP", fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50), fontSize = 18.sp)
+        // Botão de Submeter / Feedback de Acerto / Revelação de Resposta
+        when {
+            isCorrect -> {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color(0xFF4CAF50))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Correto! +20 XP", fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50), fontSize = 18.sp)
+                }
             }
-        } else {
-            Button(
-                onClick = { viewModel.submitGuess(inputText) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(28.dp),
-                enabled = inputText.isNotBlank()
-            ) {
-                Text("ENVIAR PALPITE", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+
+            showReveal -> {
+                // Card vermelho mostrando a resposta correta após erro
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Default.Error,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Resposta incorreta",
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                fontSize = 16.sp
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "A resposta correta era:",
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f),
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = item!!.correctName,
+                            fontWeight = FontWeight.Black,
+                            fontSize = 24.sp,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = { viewModel.advanceToNext() },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    Text("PRÓXIMO", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+
+            else -> {
+                Button(
+                    onClick = { viewModel.submitGuess(inputText) },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    enabled = inputText.isNotBlank()
+                ) {
+                    Text("ENVIAR PALPITE", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
         
