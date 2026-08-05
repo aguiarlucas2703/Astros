@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.astros.ui.components.SoundManager
 
 enum class QuizGameState {
     START, PLAYING, END
@@ -62,6 +63,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         _isNewRecord.value = false
         updateUiState()
         _gameState.value = QuizGameState.PLAYING
+        SoundManager.startBackgroundMusic() // Inicia música de fundo em loop
     }
 
     fun submitAnswer(selectedIndex: Int) {
@@ -74,6 +76,9 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         _selectedOptionIndex.value = selectedIndex
         _isAnswerCorrect.value = isCorrect
         _score.value = quizEngine.score
+
+        // Som de feedback imediato
+        if (isCorrect) SoundManager.playCorrect() else SoundManager.playWrong()
 
         // Espera 1.5s para o usuário ver o resultado e depois avança
         viewModelScope.launch {
@@ -115,6 +120,8 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         val currentXp = prefs.getInt("TOTAL_XP", 0)
         prefs.edit().putInt("TOTAL_XP", currentXp + (finalScore * 10)).apply()
         
+        SoundManager.stopBackgroundMusic()  // Para a música antes do som de vitória
+        SoundManager.playGameComplete()
         _gameState.value = QuizGameState.END
     }
 
@@ -122,6 +129,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
         isProcessingAnswer = false
         _selectedOptionIndex.value = null
         _isAnswerCorrect.value = null
+        SoundManager.stopBackgroundMusic() // Para a música ao abortar
         _gameState.value = QuizGameState.START
     }
 

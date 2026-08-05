@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.astros.ui.components.SoundManager
 
 enum class GuessGameState {
     START, PLAYING, RESULT
@@ -51,6 +52,7 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
         guessEngine.startNewGame()
         _score.value = 0
         _gameState.value = GuessGameState.PLAYING
+        SoundManager.startBackgroundMusic() // Inicia música de fundo em loop
         loadCurrentItem()
     }
 
@@ -80,6 +82,7 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
         if (isMatch) {
             _isCorrect.value = true
             _score.value = guessEngine.score
+            SoundManager.playCorrect()
 
             // Gamificação: Adivinhar por texto vale 20 XP
             val currentXp = prefs.getInt("TOTAL_XP", 0)
@@ -93,6 +96,7 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             // Erro: mostra mensagem de erro brevemente, depois revela a resposta correta
             _showError.value = true
+            SoundManager.playWrong()
             viewModelScope.launch {
                 delay(800)
                 _showError.value = false
@@ -107,11 +111,14 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
         if (hasNext) {
             loadCurrentItem()
         } else {
+            SoundManager.stopBackgroundMusic() // Para antes do som de vitória
+            SoundManager.playGameComplete()
             _gameState.value = GuessGameState.RESULT
         }
     }
 
     fun giveUp() {
+        SoundManager.stopBackgroundMusic() // Para a música ao abortar
         _gameState.value = GuessGameState.START
     }
 }
