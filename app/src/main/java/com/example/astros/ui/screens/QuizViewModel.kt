@@ -4,14 +4,16 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.astros.data.MatchHistoryRepository
+import com.example.astros.data.MatchRecord
 import com.example.astros.quiz.Question
 import com.example.astros.quiz.QuizEngine
+import com.example.astros.ui.components.SoundManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.example.astros.ui.components.SoundManager
 
 enum class QuizGameState {
     START, PLAYING, END
@@ -28,6 +30,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
 
     private val quizEngine = QuizEngine()
     private val prefs = application.getSharedPreferences("AstrosQuizPrefs", Context.MODE_PRIVATE)
+    private val matchRepository = MatchHistoryRepository.getInstance(application)
 
     // Estados da Interface
     private val _gameState = MutableStateFlow(QuizGameState.START)
@@ -108,19 +111,33 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun finishQuiz() {
         val finalScore = quizEngine.score
+        val totalQuestions = quizEngine.totalQuestions
         val currentHigh = _highScore.value
-        
+
         if (finalScore > currentHigh) {
             _isNewRecord.value = true
             _highScore.value = finalScore
             prefs.edit().putInt("HIGH_SCORE", finalScore).apply()
         }
-        
+
         // Gamificação: Soma XP Total (10 XP por acerto)
+        val xpEarned = finalScore * 10
         val currentXp = prefs.getInt("TOTAL_XP", 0)
-        prefs.edit().putInt("TOTAL_XP", currentXp + (finalScore * 10)).apply()
-        
-        SoundManager.stopBackgroundMusic()  // Para a música antes do som de vitória
+        prefs.edit().putInt("TOTAL_XP", currentXp + xpEarned).apply()
+
+        // Salva partida no histórico
+        viewModelScope.launch {
+            matchRepository.insert(
+                MatchRecord(
+                    gameType = "Quiz",
+                    score    = finalScore,
+                    total    = totalQuestions,
+                    xpEarned = xpEarned
+                )
+            )
+        }
+
+        SoundManager.stopBackgroundMusic()
         SoundManager.playGameComplete()
         _gameState.value = QuizGameState.END
     }

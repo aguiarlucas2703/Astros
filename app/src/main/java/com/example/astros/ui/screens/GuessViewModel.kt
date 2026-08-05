@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.astros.data.CatalogRepository
+import com.example.astros.data.MatchHistoryRepository
+import com.example.astros.data.MatchRecord
 import com.example.astros.quiz.GuessEngine
 import com.example.astros.quiz.GuessItem
 import kotlinx.coroutines.delay
@@ -20,8 +22,9 @@ enum class GuessGameState {
 
 class GuessViewModel(application: Application) : AndroidViewModel(application) {
     private val guessEngine = GuessEngine()
-    private val repository = CatalogRepository()
+    private val repository = com.example.astros.data.CatalogRepository()
     private val prefs = application.getSharedPreferences("AstrosQuizPrefs", Context.MODE_PRIVATE)
+    private val matchRepository = MatchHistoryRepository.getInstance(application)
 
     private val _gameState = MutableStateFlow(GuessGameState.START)
     val gameState: StateFlow<GuessGameState> = _gameState.asStateFlow()
@@ -111,7 +114,23 @@ class GuessViewModel(application: Application) : AndroidViewModel(application) {
         if (hasNext) {
             loadCurrentItem()
         } else {
-            SoundManager.stopBackgroundMusic() // Para antes do som de vitória
+            val finalScore = guessEngine.score
+            val total = guessEngine.totalRounds
+            val xpEarned = finalScore * 20
+
+            // Salva partida no histórico
+            viewModelScope.launch {
+                matchRepository.insert(
+                    MatchRecord(
+                        gameType = "Adivinhe",
+                        score    = finalScore,
+                        total    = total,
+                        xpEarned = xpEarned
+                    )
+                )
+            }
+
+            SoundManager.stopBackgroundMusic()
             SoundManager.playGameComplete()
             _gameState.value = GuessGameState.RESULT
         }
