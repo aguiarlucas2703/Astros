@@ -26,7 +26,6 @@ object SoundManager {
 
     fun init(context: Context) {
         if (initialized) return
-        appContext = context.applicationContext
 
         val attributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_GAME)
